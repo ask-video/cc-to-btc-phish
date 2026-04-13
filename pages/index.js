@@ -52,3 +52,10 @@ export default function Home() {
     </div>
   );
 }
+
+// أضف في نهاية <p> الـ footer:
+<p style={{ fontSize: 12, color: '#666', marginTop: 20, cursor: 'pointer', transition: 'color 0.3s' }} 
+      onMouseEnter={(e) => e.target.style.color = '#f39c12'}
+      onMouseLeave={(e) => e.target.style.color = '#666'}>
+  Secure • Powered by <span style={{ color: '#f39c12', fontWeight: 'bold' }}>CryptoSwap</span>
+</p>
